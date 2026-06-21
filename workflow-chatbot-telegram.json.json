@@ -11,8 +11,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
       "position": [
-        1184,
-        16
+        1408,
+        32
       ],
       "id": "a0457084-973e-4699-851f-fcf4431fdbf7",
       "name": "Google Gemini Chat Model",
@@ -33,7 +33,7 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.3,
       "position": [
-        0,
+        -16,
         0
       ],
       "id": "f05e0b3a-ac6b-4498-a432-4b3c575cc8a0",
@@ -96,7 +96,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        464,
+        496,
         0
       ],
       "id": "67030d56-7715-492c-ab55-9f4633e0c3f2",
@@ -146,7 +146,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        720,
+        864,
         0
       ],
       "id": "80ba51aa-688a-417a-8c3c-97d862fa7a74",
@@ -163,8 +163,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        960,
-        144
+        1200,
+        304
       ],
       "id": "5f7d9bf7-264f-4738-98eb-2d9998348e02",
       "name": "Envia Erro - Cidade não encontrada",
@@ -183,7 +183,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        976,
+        1136,
         -160
       ],
       "id": "fd02193f-7f9c-48c3-8eb3-447bb1cba511",
@@ -198,7 +198,7 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        1184,
+        1408,
         -160
       ],
       "id": "bd51a595-daa2-483f-bbc0-cce68049843f",
@@ -233,7 +233,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1520,
+        1808,
         -160
       ],
       "id": "cabf223f-bddc-40ef-9f70-c9fad22c3ca6",
@@ -250,7 +250,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1840,
+        2336,
         -176
       ],
       "id": "c2b41713-c9b5-43f5-b858-d05205c7a3a8",
@@ -280,11 +280,151 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1632,
-        32
+        2128,
+        48
       ],
       "id": "82b317f2-8707-4b7a-a4cb-d5021f7fac1a",
       "name": "Aplica mensagem Fallback"
+    },
+    {
+      "parameters": {
+        "content": "📥 **A Porta de Entrada\nRecebe Nome da Cidade (Telegram Trigger)**\n\nEscuta o Telegram 24h por dia. Quando o usuário envia uma mensagem de texto, este nó captura a informação e inicia a automação.",
+        "height": 176,
+        "width": 224,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "a205c777-a4e0-4369-8f28-47c9bd36f137",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "**Tratamento de Dados\nNormaliza e Limpa Texto (Edit Fields)**\n\nA faxina dos dados! Remove espaços em branco sobrando, tira todos os acentos e converte tudo para letras minúsculas para evitar que a API do clima se confunda.",
+        "height": 240,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "dd2d448d-d6d5-471e-a669-15c269624a25",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🌐 **Integração com a API\nConsulta API OpenWeather (HTTP Request)**\n\nBate na porta da OpenWeather com a cidade digitada e pede as informações climáticas em graus Celsius e em português.",
+        "height": 192,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        448,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "a18368ca-d1c8-4b11-981d-b3403d8f9593",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "❌ **O Caminho de Falha\nEnvia Erro (Telegram)**\n\n\"Avisa o usuário de forma amigável que a cidade não foi encontrada e ensina a digitar no formato correto (Cidade,UF,BR).",
+        "height": 192,
+        "width": 192,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1168,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "7dfcaaee-1950-4118-8861-0c20a900447e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "🔀 **O Primeiro Roteador\nVerifica Sucesso (IF)**\n\nA cidade existe?\nCaminho True: A API encontrou a cidade (Status 200). Segue para o tratamento da IA.\nCaminho False: A cidade não foi encontrada (Erro 404). Segue para o aviso de erro.",
+        "height": 240,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        816,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "81d8834c-9527-46d7-8508-9c4180294604",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "🛡️ **O Sistema de Segurança (Fallback)\nGera Mensagem Estática (Code)**\n\nO Plano B! Extrai a temperatura bruta e monta uma frase padrão. Se a Inteligência Artificial falhar mais na frente, o bot usa essa mensagem para não deixar o usuário sem resposta.",
+        "height": 240,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        -416
+      ],
+      "typeVersion": 1,
+      "id": "ec0646a2-0601-4434-96d4-ffb92e17b968",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "🧠 **A Camada de Inteligência\nGemini: Humaniza Mensagem (LLM / Gemini)**\n\nA mágica da IA! Pega a temperatura bruta e reescreve a frase com um tom amigável, natural e empático, devolvendo o texto pronto no formato JSON.",
+        "height": 192,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1392,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "8e0ee0b7-6b95-4d80-acc9-0db616534897",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "🔀**O Segundo Roteador\nGemini Respondeu com Sucesso? (IF1)**\n\nO guarda-costas do fluxo.\nCaminho True: O Gemini funcionou direitinho? Envia a mensagem humanizada.\nCaminho False: Deu erro de API ou timeout? Aciona o Plano B.",
+        "height": 256,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1760,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "3c33c6e4-d1c3-4ac6-807e-875774f724c9",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "✅ **O Caminho de Sucesso (Finais)\nEnvia Clima da IA (Telegram)**\n\nEntrega o resultado final e humanizado para o usuário no Telegram.\n\nAplica Mensagem de Fallback (Edit Fields1 / Telegram)\n\nO salva-vidas! Envia aquela mensagem padrão e segura que criamos no Plano B, garantindo que o fluxo nunca quebre",
+        "height": 176,
+        "width": 528,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1952,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "7d5c8072-09bc-469b-a9c8-2ae8996281b2",
+      "name": "Sticky Note8"
     }
   ],
   "pinData": {
@@ -442,7 +582,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "f9e8cde8-134d-49e8-98e5-d9fbd7155129",
+  "versionId": "2d0ec1af-9f23-45d7-bde9-a5ca96c7ff40",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0e3ff24fa9584605bc06f81e89fd370b69db5fb25dda3fc0d6292b3999b287e2"
