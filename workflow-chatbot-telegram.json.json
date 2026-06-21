@@ -1,0 +1,452 @@
+{
+  "name": "Chatbot Clima",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        16
+      ],
+      "id": "a0457084-973e-4699-851f-fcf4431fdbf7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "W7b4bVlxtZAurf9u",
+          "name": "Gemini - Gabi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f05e0b3a-ac6b-4498-a432-4b3c575cc8a0",
+      "name": "Recebe dados",
+      "webhookId": "443bcbe5-3a4f-4d32-8989-f0c728fa728a",
+      "credentials": {
+        "telegramApi": {
+          "id": "lPWSKc8TUC2zgLE3",
+          "name": "Telegram bot clima"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4de35e6e-cf18-4186-9f4f-9ea3f0ed7617",
+              "name": "queue",
+              "value": "={{ $json.message.text.trim().toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\").replace(/\\s*,\\s*/g, \",\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ],
+      "id": "c9c80ebc-c068-42a5-b21c-6777d59ce310",
+      "name": "Normaliza e limpa texto"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openWeatherMapApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.queue }}"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "67030d56-7715-492c-ab55-9f4633e0c3f2",
+      "name": "Consulta API OpenWeather",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "edVsGgXlmfMIlsJK",
+          "name": "OpenWeatherMap account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2a37e4b8-2c78-46e7-b18e-a66dacf74e5c",
+              "leftValue": "={{ $json.cod }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "faabf8e8-ee8c-4ffe-bd39-8efd92d56f82",
+              "leftValue": "={{ $json.main.temp }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        0
+      ],
+      "id": "80ba51aa-688a-417a-8c3c-97d862fa7a74",
+      "name": "Verifica Sucesso"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recebe dados').item.json.message.chat.id }}",
+        "text": "❌ Cidade não encontrada. Use o formato Cidade,UF,BR (ex.: São Paulo,SP,BR).",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        144
+      ],
+      "id": "5f7d9bf7-264f-4738-98eb-2d9998348e02",
+      "name": "Envia Erro - Cidade não encontrada",
+      "webhookId": "a38e8d60-4380-4acd-98c8-4be61c23d187",
+      "credentials": {
+        "telegramApi": {
+          "id": "lPWSKc8TUC2zgLE3",
+          "name": "Telegram bot clima"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst cidade = data.name;\nconst temperatura = Math.round(data.main.temp);\n\nconst mensagem_fallback = `🌤️ A temperatura em ${cidade} é de ${temperatura}°C.`;\n\nreturn {\n  mensagem_fallback: mensagem_fallback,\n  cidade: cidade,\n  temperatura: temperatura\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -160
+      ],
+      "id": "fd02193f-7f9c-48c3-8eb3-447bb1cba511",
+      "name": "Gera a mensagem  Fallback"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um assistente meteorológico amigável. A cidade é {{ $json.cidade }} e a temperatura atual é {{ $json.temperatura }}°C. Reescreva essa informação de forma natural, clara e simpática em português brasileiro. Retorne APENAS um JSON válido no seguinte formato, sem formatação markdown: {\"message\": \"sua mensagem aqui\", \"ok\": true}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1184,
+        -160
+      ],
+      "id": "bd51a595-daa2-483f-bbc0-cce68049843f",
+      "name": "LLM Humaniza a mensagem",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fcf8b1bf-5357-401c-9b9e-685fbaa3cba3",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "={{ $json.text }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1520,
+        -160
+      ],
+      "id": "cabf223f-bddc-40ef-9f70-c9fad22c3ca6",
+      "name": "Gemini Respondeu com sucesso?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recebe dados').item.json.message.chat.id }}",
+        "text": "={{ JSON.parse($json.text).message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        -176
+      ],
+      "id": "c2b41713-c9b5-43f5-b858-d05205c7a3a8",
+      "name": "Envia Clima Formatado pela IA",
+      "webhookId": "a38e8d60-4380-4acd-98c8-4be61c23d187",
+      "credentials": {
+        "telegramApi": {
+          "id": "lPWSKc8TUC2zgLE3",
+          "name": "Telegram bot clima"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4487a89d-6c7e-4e21-842e-41da0bdcb102",
+              "name": "text",
+              "value": "={{ $('Gera a mensagem  Fallback').item.json.mensagem_fallback }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1632,
+        32
+      ],
+      "id": "82b317f2-8707-4b7a-a4cb-d5021f7fac1a",
+      "name": "Aplica mensagem Fallback"
+    }
+  ],
+  "pinData": {
+    "Recebe dados": [
+      {
+        "json": {
+          "update_id": 851027698,
+          "message": {
+            "message_id": 10,
+            "from": {
+              "id": 8066739746,
+              "is_bot": false,
+              "first_name": "Gabi",
+              "last_name": "Starosky",
+              "language_code": "pt-br"
+            },
+            "chat": {
+              "id": 8066739746,
+              "first_name": "Gabi",
+              "last_name": "Starosky",
+              "type": "private"
+            },
+            "date": 1781451233,
+            "text": "Blumenau"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Humaniza a mensagem",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recebe dados": {
+      "main": [
+        [
+          {
+            "node": "Normaliza e limpa texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliza e limpa texto": {
+      "main": [
+        [
+          {
+            "node": "Consulta API OpenWeather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consulta API OpenWeather": {
+      "main": [
+        [
+          {
+            "node": "Verifica Sucesso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Sucesso": {
+      "main": [
+        [
+          {
+            "node": "Gera a mensagem  Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Envia Erro - Cidade não encontrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gera a mensagem  Fallback": {
+      "main": [
+        [
+          {
+            "node": "LLM Humaniza a mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Humaniza a mensagem": {
+      "main": [
+        [
+          {
+            "node": "Gemini Respondeu com sucesso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Respondeu com sucesso?": {
+      "main": [
+        [
+          {
+            "node": "Envia Clima Formatado pela IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aplica mensagem Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia Clima Formatado pela IA": {
+      "main": [
+        []
+      ]
+    },
+    "Aplica mensagem Fallback": {
+      "main": [
+        [
+          {
+            "node": "Envia Clima Formatado pela IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f9e8cde8-134d-49e8-98e5-d9fbd7155129",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e3ff24fa9584605bc06f81e89fd370b69db5fb25dda3fc0d6292b3999b287e2"
+  },
+  "id": "6sOQMGIWeQY6yIdb",
+  "tags": []
+}
