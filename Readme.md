@@ -28,24 +28,24 @@ Para rodar este projeto, você precisará de:
 Para garantir a segurança, nenhuma chave está exposta no código. O avaliador/usuário deverá configurar as credenciais nativamente no n8n.
 
 ### 1. Telegram Bot (`TELEGRAM_BOT_TOKEN`)
-* Acesse os nós `Telegram Trigger` e os nós de envio de mensagem (`Send a text message`).
-* Em **Credential for Telegram API**, crie uma nova credencial e insira o seu token fornecido pelo BotFather.
+* Acesse o nó inicial **`Recebe dados`** e os nós finais de envio (**`Envia Erro - Cidade não encontrada`** e **`Envia Clima Formatado pela IA`**).
+* Em *Credential for Telegram API*, crie uma nova credencial e insira o seu token fornecido pelo BotFather.
 
 ### 2. OpenWeather API (`OPENWEATHER_API_KEY`)
-* Acesse o nó **HTTP Request**.
-* Na lista de *Query Parameters*, localize a chave `appid`.
-* Insira a sua API Key da OpenWeather no campo *Value* correspondente.
+* Acesse o nó **`Consulta API OpenWeather`**.
+* A autenticação está configurada para usar o cofre do n8n. No campo *Credential for OpenWeatherMap API*, crie uma nova credencial do tipo `OpenWeatherMap account` e cole a sua API Key lá dentro.
 
 ---
 
 ## 🧠 Uso do Google Gemini e Sistema de Fallback
 Para enriquecer a experiência do usuário, este workflow utiliza um modelo LLM (**Google Gemini 2.5 Flash**) para formatar a mensagem final.
-* **Onde está localizado:** O nó `Google Gemini Chat Model` está conectado à rota de sucesso do `HTTP Request`.
-* **Como ativar:** Caso queira usar a IA, basta adicionar a sua credencial do Google AI Studio no nó do Gemini. 
+* **Onde está localizado:** O nó **`Google Gemini Chat Model`** (ligado ao nó **`LLM Humaniza a mensagem`**) está conectado à rota de sucesso da consulta meteorológica.
+* **Como ativar:** Caso queira usar a IA, basta adicionar a sua credencial do Google AI Studio no nó do modelo Gemini. 
 
 **🛡️ Sistema de Fallback (Avaliação Segura):**
-O workflow foi desenhado com uma arquitetura tolerante a falhas. Logo antes do nó da IA, existe um nó chamado `Code in JavaScript`. Ele gera a mensagem de temperatura de forma determinística e estática. 
-Caso o nó do Gemini falhe (por exemplo, devido à ausência de credenciais por parte do avaliador), um nó condicional (`If1`) identifica a falha e redireciona o fluxo automaticamente para enviar a mensagem determinística. **Isso garante que o projeto possa ser avaliado sem custos adicionais e sem quebrar a automação.**
+O workflow foi desenhado com uma arquitetura tolerante a falhas. Logo antes da integração com a IA, existe um nó chamado **`Gera a mensagem Fallback`**. Ele extrai a temperatura bruta e cria uma mensagem de forma determinística e estática. 
+
+Caso o nó do Gemini falhe (por exemplo, devido à ausência de credenciais por parte do avaliador), o nó condicional **`Gemini Respondeu com sucesso?`** identifica a falha e redireciona o fluxo automaticamente para o nó **`Aplica mensagem Fallback`**. Isso garante que o projeto possa ser avaliado sem custos adicionais e que o usuário receba a temperatura sem quebrar a automação.
 
 ---
 
